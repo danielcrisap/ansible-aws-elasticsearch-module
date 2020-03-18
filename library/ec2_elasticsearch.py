@@ -103,9 +103,9 @@ options:
     required: false
   encryption_at_rest_kms_key_id:
     description:
-      - If encryption_at_rest_enabled is True, this identifies the encryption key to use 
+      - If encryption_at_rest_enabled is True, this identifies the encryption key to use
     required: false
-    
+
 requirements:
   - "python >= 2.6"
   - boto3
@@ -155,8 +155,8 @@ def main():
             volume_type = dict(required=True),
             volume_size = dict(required=True, type='int'),
             access_policies = dict(required=True, type='dict'),
-            vpc_subnets = dict(required=False),
-            vpc_security_groups = dict(required=False),
+            vpc_subnets = dict(required=False, type='list'),
+            vpc_security_groups = dict(required=False, type='list'),
             snapshot_hour = dict(required=True, type='int'),
             elasticsearch_version = dict(default='2.3'),
             encryption_at_rest_enabled = dict(default=False),
@@ -174,14 +174,14 @@ def main():
     client = boto3_conn(module=module, conn_type='client', resource='es', region=region, **aws_connect_params)
 
     cluster_config = {
-           'InstanceType': module.params.get('instance_type'),
-           'InstanceCount': int(module.params.get('instance_count')),
-           'DedicatedMasterEnabled': module.params.get('dedicated_master'),
-           'ZoneAwarenessEnabled': module.params.get('zone_awareness')
+            'InstanceType': module.params.get('instance_type'),
+            'InstanceCount': int(module.params.get('instance_count')),
+            'DedicatedMasterEnabled': module.params.get('dedicated_master'),
+            'ZoneAwarenessEnabled': module.params.get('zone_awareness')
     }
 
     ebs_options = {
-           'EBSEnabled': module.params.get('ebs')
+            'EBSEnabled': module.params.get('ebs')
     }
 
     encryption_at_rest_enabled = module.params.get('encryption_at_rest_enabled') == 'True'
@@ -195,10 +195,10 @@ def main():
     vpc_options = {}
 
     if module.params.get('vpc_subnets'):
-        vpc_options['SubnetIds'] = [x.strip() for x in module.params.get('vpc_subnets').split(',')]
+        vpc_options['SubnetIds'] = [x.strip() for x in module.params.get('vpc_subnets')]
 
     if module.params.get('vpc_security_groups'):
-        vpc_options['SecurityGroupIds'] = [x.strip() for x in module.params.get('vpc_security_groups').split(',')]
+        vpc_options['SecurityGroupIds'] = [x.strip() for x in module.params.get('vpc_security_groups')]
 
     if cluster_config['DedicatedMasterEnabled']:
         cluster_config['DedicatedMasterType'] = module.params.get('dedicated_master_instance_type')
